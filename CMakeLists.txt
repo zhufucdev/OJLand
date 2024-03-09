@@ -5,3 +5,5 @@ set(CMAKE_CXX_STANDARD 14)
 add_compile_definitions(DEBUG)
 
 add_executable(Playground main.cpp)
+
+add_executable(How how.cpp)
