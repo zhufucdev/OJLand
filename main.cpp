@@ -38,11 +38,14 @@ void search(vector<int> &ring, vector<bool> &used, int n) {
 }
 
 int main() {
-    int n;
-    cin >> n;
-    vector<int> ring = {1};
-    vector<bool> used(n + 1, false);
-    used[1] = true;
-    search(ring, used, n);
+    int c = 1, n;
+    while (cin >> n) {
+        vector<int> ring = {1};
+        vector<bool> used(n + 1, false);
+        used[1] = true;
+        cout << "Case " << c++ << ":" << endl;
+        search(ring, used, n);
+        cout << endl;
+    }
     return 0;
 }
