@@ -5,32 +5,35 @@
 
 using namespace std;
 
-int count_spanning(const int arr[], int middle, int end);
-
-int count_ends(const int arr[], int len);
-
-int count_ends(const int arr[], int len) {
+int r_count(int arr[], int tmp[], int len) {
     if (len < 2) {
         return 0;
-    } else if (len == 2) {
-        return arr[0] > arr[1];
     } else {
-        return count_spanning(arr, len / 2, len);
-    }
-}
-
-int count_spanning(const int arr[], int middle, int end) {
-    int left = count_ends(arr, middle);
-    int right = count_ends(arr + middle, end - middle);
-    int spanning = 0;
-    for (int i = 0; i < middle; ++i) {
-        for (int j = middle; j < end; ++j) {
-            if (arr[i] > arr[j]) {
-                spanning++;
+        int middle = len / 2;
+        int left = r_count(arr, tmp, middle);
+        int right = r_count(arr + middle, tmp + middle, len - middle);
+        int spanning = 0;
+        int i = 0, j = middle, k = 0;
+        while (i < middle && j < len) {
+            if (arr[i] <= arr[j]) {
+                tmp[k] = arr[i];
+                ++i;
+            } else {
+                tmp[k] = arr[j];
+                spanning += middle - i; // Count the inversions
+                ++j;
             }
+            ++k;
         }
+        while (i < middle) { // Copy the remaining elements from the left half
+            tmp[k++] = arr[i++];
+        }
+        while (j < len) { // Copy the remaining elements from the right half
+            tmp[k++] = arr[j++];
+        }
+        copy(tmp, tmp + len, arr);
+        return left + right + spanning;
     }
-    return left + right + spanning;
 }
 
 bool solve() {
@@ -38,11 +41,11 @@ bool solve() {
     if (!(cin >> n)) {
         return false;
     }
-    int *arr = new int[n];
+    int *arr = new int[n], *tmp = new int[n];
     for (int i = 0; i < n; ++i) {
         cin >> arr[i];
     }
-    cout << count_spanning(arr, n / 2, n);
+    cout << r_count(arr, tmp, n);
     delete[] arr;
     return true;
 }
