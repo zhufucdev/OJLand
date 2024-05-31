@@ -1,56 +1,50 @@
-#include <iostream>
-#include <algorithm>
+#include<iostream>
 
 using namespace std;
 
-int r_count(int arr[], int tmp[], int left, int right) {
-    if (right - left <= 1) {
-        return 0;
-    } else {
-        int middle = (left + right) / 2;
-        int left_count = r_count(arr, tmp, left, middle);
-        int right_count = r_count(arr, tmp, middle, right);
-        int spanning = 0;
-        int i = left, j = middle, k = left;
-        while (i < middle && j < right) {
-            if (arr[i] <= arr[j]) {
-                tmp[k] = arr[i];
-                ++i;
-            } else {
-                tmp[k] = arr[j];
-                spanning += middle - i; // Count the inversions
-                ++j;
-            }
-            ++k;
+long sort(int data[], int tmp[], int l, int m, int r) {
+    long num = 0;
+    int i = l, k = l;
+    int j = m + 1;
+    while (i <= m && j <= r) {
+        if (data[i] > data[j]) {
+            num += m + 1 - i;
+            tmp[k++] = data[j++];
+        } else {
+            tmp[k++] = data[i++];
         }
-        while (i < middle) { // Copy the remaining elements from the left half
-            tmp[k++] = arr[i++];
-        }
-        while (j < right) { // Copy the remaining elements from the right half
-            tmp[k++] = arr[j++];
-        }
-        copy(tmp + left, tmp + right, arr + left);
-        return left_count + right_count + spanning;
     }
+    while (i <= m) {
+        tmp[k++] = data[i++];
+    }
+    while (j <= r) {
+        tmp[k++] = data[j++];
+    }
+    for (int t = l; t <= r; t++) {
+        data[t] = tmp[t];
+    }
+    return num;
 }
 
-bool solve() {
-    int n;
-    if (!(cin >> n)) {
-        return false;
+long merge(int a[], int b[], int l, int r) {
+    long sum = 0;
+    if (l < r) {
+        int middle = (l + r) / 2;
+        sum += merge(a, b, l, middle);
+        sum += merge(a, b, middle + 1, r);
+        sum += sort(a, b, l, middle, r);
     }
-    int *arr = new int[n], *tmp = new int[n];
-    for (int i = 0; i < n; ++i) {
-        cin >> arr[i];
-    }
-    cout << r_count(arr, tmp, 0, n);
-    delete[] arr;
-    return true;
+    return sum;
 }
 
 int main() {
-    while (solve()) {
-        cout << "\n";
+    int n;
+    cin >> n;
+    int *arr = new int[n], *tmp = new int[n];
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
     }
+    int l = 0, r = n - 1;
+    cout << merge(arr, tmp, l, r) << endl;
     return 0;
 }
