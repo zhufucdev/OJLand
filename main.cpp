@@ -20,7 +20,7 @@ vector<int> dijsktra(const vector<vertex> &vertexes, int start) {
     dis[start] = 0;
 
     priority_queue<tuple<int, int>, vector<tuple<int, int>>, greater<>> pq;
-    pq.emplace(start, 0);
+    pq.emplace(0, start);
     while (!pq.empty()) {
         auto curr = pq.top();
         pq.pop();
@@ -36,8 +36,8 @@ vector<int> dijsktra(const vector<vertex> &vertexes, int start) {
 
         for (auto &e: vertexes[to_vertex].edges) {
             auto len = e.second + base_distance;
-            pq.emplace(len, e.first);
             if (len < dis[e.first]) {
+                pq.emplace(len, e.first);
                 dis[e.first] = len;
             }
         }
@@ -65,17 +65,22 @@ int main() {
         vertexes[from].edges[to] = len;
         edges[i].from = from;
         edges[i].to = to;
+
+        vertexes[to].num = to;
+        vertexes[to].edges[from] = len;
     }
 
     auto x = dijsktra(vertexes, 0)[n - 1];
     auto max_y = 0;
     for (int i = 0; i < edges_num; ++i) {
-        auto copy = vector<vertex>(vertexes.begin(), vertexes.end());
-        copy[edges[i].from].edges[edges[i].to] *= 2;
-        auto y = dijsktra(copy, 0)[n - 1];
-        if (y > max_y) {
+        vertexes[edges[i].from].edges[edges[i].to] *= 2;
+        vertexes[edges[i].to].edges[edges[i].from] *= 2;
+        auto y = dijsktra(vertexes, 0)[n - 1];
+        if (y < numeric_limits<int>::max() && y > max_y) {
             max_y = y;
         }
+        vertexes[edges[i].from].edges[edges[i].to] /= 2;
+        vertexes[edges[i].to].edges[edges[i].from] /= 2;
     }
 
     cout << max_y - x << endl;
