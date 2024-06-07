@@ -1,65 +1,40 @@
-//
-// Created by Reed Steve on 2024/3/9.
-//
 #include <iostream>
+#include <vector>
+#include <climits>
+#include <unordered_set>
+
 using namespace std;
 
-struct DpEle {
-    int pos;
-    int blunders;
-};
-DpEle dp[10000][50];
+int minPuddles(int n, int m, int k, vector<int>& puddlePositions) {
+    unordered_set<int> puddles(puddlePositions.begin(), puddlePositions.end());
+    vector<int> dp(n + 1, INT_MAX);
+    dp[1] = puddles.count(1) ? 1 : 0;
+
+    for (int i = 1; i <= n; ++i) {
+        if (dp[i] == INT_MAX) continue; // 如果当前位置不可达，跳过
+        for (int j = 1; j <= k; ++j) {
+            int nextPosition = i + j;
+            if (nextPosition > n) break;
+            int nextPuddles = dp[i] + (puddles.count(nextPosition) ? 1 : 0);
+            if (nextPuddles < dp[nextPosition]) {
+                dp[nextPosition] = nextPuddles;
+            }
+        }
+    }
+
+    return dp[n];
+}
 
 int main() {
-    int length, pods_num, speed;
-    cin >> length >> pods_num >> speed;
-    int pods_pos[pods_num];
-    for (int i = 0; i < pods_num; ++i) {
-        cin >> pods_pos[i];
-    }
-    for (int i = 0; i < speed; ++i) {
-        dp[0][i] = {1, 0};
+    int n, m, k;
+    cin >> n >> m >> k;
+    vector<int> puddlePositions(m);
+    for (int i = 0; i < m; ++i) {
+        cin >> puddlePositions[i];
     }
 
-    int iter = 1;
-    while (true) {
-        auto any_change = false;
-        auto last = dp[iter - 1][0];
-        for (int j = 1; j < speed; ++j) {
-            auto curr = dp[iter - 1][j];
-            if (curr.blunders < last.blunders || curr.blunders == last.blunders && curr.pos > last.blunders) {
-                last = dp[iter - 1][j];
-            }
-        }
-        for (int i = 0; i < speed; ++i) {
-            if (last.pos == length) {
-                dp[iter][i] = last;
-                continue;
-            }
-            auto will_have_blunder = false;
-            auto target_pos = last.pos + i + 1;
-            for (int j = 0; j < pods_num; ++j) {
-                if (pods_pos[j] == target_pos) {
-                    will_have_blunder = true;
-                    break;
-                }
-            }
-            dp[iter][i] = DpEle{target_pos, will_have_blunder ? last.blunders + 1 : last.blunders};
-            any_change = true;
-        }
-        if (!any_change) {
-            break;
-        }
-        iter++;
-    }
-
-    int least_blunders = length;
-    for (int i = 0; i < speed; ++i) {
-        if (dp[iter][i].blunders < least_blunders) {
-            least_blunders = dp[iter][i].blunders;
-        }
-    }
-    cout << least_blunders << endl;
+    int result = minPuddles(n, m, k, puddlePositions);
+    cout << result << endl;
 
     return 0;
 }
