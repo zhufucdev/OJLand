@@ -1,41 +1,43 @@
-//
-// Created by Reed Steve on 2024/3/9.
-//
 #include <iostream>
-#include <algorithm>
-
+#include <vector>
 using namespace std;
 
-int dia_len(int size, int idx) {
-    return (size * 2 - 1) / 2 - abs((2 * size - 1) / 2 - idx) + 1;
-}
+int n;
+vector<vector<int>> board;
+vector<bool> col, diag1, diag2;
+int solution_count = 0;
 
-pair<int, int> orth_to_dia(int size, int x, int y) {
-    int mid_index = (size + 1) / 2;
-    return make_pair(x > y ? mid_index - min(x, y) : mid_index + min(x, y), min(x, y) + 1);
-}
+void solve(int row) {
+    if (row == n) {
+        solution_count++;
+        return;
+    }
 
-int backtrace(int *on_primary_dia, bool **cell_dead, int size, int dia_idx) {
-    
+    for (int c = 0; c < n; ++c) {
+        if (board[row][c] == 1) continue; // Skip bad cells
+        if (!col[c] && !diag1[row - c + n - 1] && !diag2[row + c]) {
+            col[c] = diag1[row - c + n - 1] = diag2[row + c] = true;
+            solve(row + 1);
+            col[c] = diag1[row - c + n - 1] = diag2[row + c] = false;
+        }
+    }
 }
 
 int main() {
-    int n;
     cin >> n;
-    int on_primary_dia[n];
-    bool **cell_broken = new bool *[n];
+    board.resize(n, vector<int>(n));
+    col.resize(n, false);
+    diag1.resize(2 * n - 1, false);
+    diag2.resize(2 * n - 1, false);
+
     for (int i = 0; i < n; ++i) {
-        cell_broken[i] = new bool[n];
         for (int j = 0; j < n; ++j) {
-            int t;
-            cin >> t;
-            auto p = orth_to_dia(n, i, j);
-            cell_broken[p.first][p.second] = t == 1;
+            cin >> board[i][j];
         }
     }
 
-    cout << backtrace(on_primary_dia, cell_broken, n, 0) << endl;
+    solve(0);
 
-    delete []cell_broken;
+    cout << solution_count << endl;
     return 0;
 }
