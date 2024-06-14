@@ -6,7 +6,7 @@
 using namespace std;
 
 #define set_two(mat, x, y, m, n) \
-if (x > 0 && x < m && y > 0 && y < n && (!mat[y][x] || mat[y][x] == -1)) { \
+if (x >= 0 && x < m && y >= 0 && y < n && (!mat[y][x] || mat[y][x] == -1)) { \
     mat_next[y][x] = 2;     \
     any_change = true; \
 } \
