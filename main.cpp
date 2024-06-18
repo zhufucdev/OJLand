@@ -1,65 +1,80 @@
-//
-// Created by Reed Steve on 2024/3/9.
-//
 #include <iostream>
-#include <vector>
-#include <algorithm>
+#include <stack>
 
 using namespace std;
 
-#define value_at(x, y) x >= 0 && x < n && y >= 0 && y < n && map[y][x] != 'W' ? dp[y][x] : 0
+struct map {
+public:
+    int m, n;
+    char grid[50][50];
+    bool visited[50][50];
+};
 
-bool has_solution(int m, int n) {
-    vector<string> map(m);
-    vector<vector<int>> dp(m, vector<int>(n, 0));
+struct node {
+    int x, y, health;
 
-    for (int i = 0; i < m; ++i) {
-        cin >> map[i];
-    }
+    node(int _x, int _y, int _health) : x(_x), y(_y), health(_health) {}
+};
 
-    dp[0][0] = 3;
-    while (true) {
-        vector<vector<int>> dp_next(m, vector<int>(n, 0));
-        bool change = false;
+bool dfs(map &dungeon) {
+    auto m = dungeon.m, n = dungeon.n;
+    stack<node> sta;
+    sta.emplace(0, 0, 3);
 
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                if (map[i][j] == 'W') {
-                    continue;
-                }
-                int east = value_at(j + 1, i);
-                int south = value_at(j, i + 1);
-                int west = value_at(j - 1, i);
-                int north = value_at(j, i - 1);
-                int max_surrounding = max({east, south, west, north});
-                int next = map[i][j] == 'X' ? max_surrounding - 1 : max_surrounding;
+    while (!sta.empty()) {
+        node node = sta.top();
+        sta.pop();
+        int x = node.x, y = node.y, health = node.health;
 
-                if (next > dp[i][j]) {
-                    dp_next[i][j] = next;
-                    change = true;
-                } else {
-                    dp_next[i][j] = dp[i][j];
-                }
-            }
+        if (x == m - 1 && y == n - 1) {
+            return true;
         }
 
-        dp = dp_next;
-        if (!change || dp[m - 1][n - 1] > 0) {
-            return dp[m - 1][n - 1] > 0;
+        if (x < 0 || x >= m || y < 0 || y >= n || dungeon.grid[x][y] == 'W' || health <= 0 || dungeon.visited[x][y]) {
+            continue;
         }
+
+        dungeon.visited[x][y] = true;
+
+        if (dungeon.grid[x][y] == 'X') {
+            health--;
+        }
+
+        sta.emplace(x - 1, y, health);
+        sta.emplace(x + 1, y, health);
+        sta.emplace(x, y - 1, health);
+        sta.emplace(x, y + 1, health);
     }
+
+    return false;
 }
 
 int main() {
-    int k, m, n;
-    cin >> k;
-    cin >> m >> n;
-    for (int i = 0; i < k; ++i) {
-        if (has_solution(m, n)) {
+    int K, M, N;
+    cin >> K >> M >> N;
+
+    for (int k = 0; k < K; ++k) {
+        map dungeon {M, N};
+
+        for (int i = 0; i < M; ++i) {
+            for (int j = 0; j < N; ++j) {
+                dungeon.visited[i][j] = false;
+            }
+        }
+
+
+        for (int i = 0; i < M; ++i) {
+            for (int j = 0; j < N; ++j) {
+                cin >> dungeon.grid[i][j];
+            }
+        }
+
+        if (dfs(dungeon)) {
             cout << "YES" << endl;
         } else {
             cout << "NO" << endl;
         }
     }
+
     return 0;
 }
